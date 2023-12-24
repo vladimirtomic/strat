@@ -1,2 +1,2 @@
-# mastr
-My attempt at short tandem repeats (MASTR).
+# STRAT
+Short tandem repeats analysis tool (STRAT).
