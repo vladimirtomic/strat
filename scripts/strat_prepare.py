@@ -139,7 +139,7 @@ def main():
     input_path = args.input_path
     output_path = args.output_path
 
-    # Your logic using the parameters
+    # Log provided parameters
     print(f'prefix: {prefix}')
     print(f'suffix: {suffix}')
     print(f'motif: {motif}')
@@ -153,14 +153,14 @@ def main():
     print([len(fastq_paths), fastq_paths[0], fastq_paths[-1]])
 
 
-    print(f'{datetime.now()} - Strat start')
+    print(f'{datetime.now()} - STRAT Prepare - Start')
 
     inputs = [(fastq_path, output_path, ReadProcessor(prefix, suffix, tolerance)) for fastq_path in fastq_paths]
 
     with Pool(2) as p:
         p.starmap(process_fastq, inputs)
 
-    print(f'{datetime.now()} - Strat end')
+    print(f'{datetime.now()} - STRAT Prepare - End')
 
 if __name__ == "__main__":
     main()
