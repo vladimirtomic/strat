@@ -3,8 +3,11 @@ from csv import QUOTE_NONE
 from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.ticker as plticker
+import numpy as np
 import pandas as pd
+from PIL import Image, ImageDraw
 import seaborn as sns
+from string2string.alignment import NeedlemanWunsch
 
 
 DIRECTIONS = ['fwd', 'rev']
@@ -37,6 +40,28 @@ COLUMNS_LEN = ['len_' + s for s in COLUMNS_SEQ]
 
 COLUMNS_SEQ_EXT = ['ins_ext']
 COLUMNS_LEN_EXT = ['len_ins_ext']
+
+COLUMNS_SEQ_ALN = ['ins_aln', 'ins_ext_aln']
+COLUMNS_LEN_ALN = ['len_ins_aln', 'len_ins_ext_aln']
+
+MATCH_WEIGHT = 10
+MISMATCH_WEIGHT = -8
+GAP_WEIGHT = -9
+NW = NeedlemanWunsch(
+    match_weight=MATCH_WEIGHT,
+    mismatch_weight=MISMATCH_WEIGHT,
+    gap_weight=GAP_WEIGHT,
+    gap_char=''
+)
+
+COLORS = {
+    'A': '#3DA853',  # green
+    'C': '#4285F4',  # blue
+    'G': '#F8BC07',  # yellow
+    'T': '#EA4334',  # red
+    ' ': 'white'
+}
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='STRAT Process - Short Tandem Repeat Analysis Tool - process on-target inserts collected by STRAT Prepare')
@@ -85,11 +110,53 @@ def extend_ins(row):
     return ins
 
 
+def orient_ins(row, column_seq):
+    seq = row[column_seq]
+    seq = rev_comp(seq, COMPLEMENT) if row['direction'] == 'rev' else seq
+    return seq
+
+
 def lengths(df, columns_seq, columns_len):
     for s, l in zip(columns_seq, columns_len):
         df[l] = df[s].str.len()
-        df[l + '_adj'] = (df[l] / 3).round().astype(int)
     return df
+
+
+def group(df, column_seq, column_len, cutoff=1200):
+    dfg = df.groupby([column_seq, column_len])['id'].count().reset_index()
+    dfg.columns = [column_seq, column_len, 'count']
+    cond = dfg[column_len] <= cutoff
+    dfg = dfg[cond]
+    dfg = dfg.sort_values([column_len, column_seq])
+    return dfg
+
+
+def fit_target(t, motif, nw=NW):
+    if t is not None and len(t) > 0:
+        source = int(np.round((len(t) / 3))) * motif
+        aligned_source, aligned_target = nw.get_alignment(source, t, return_score_matrix=False)
+        aligned_source = aligned_source.split(' | ')
+        aligned_target = aligned_target.split(' | ')
+        return ''.join(t for s, t in zip(aligned_source, aligned_target) if s != ' ')
+
+    return t
+
+
+def fit(row, column_seq, motif):
+    target = row[column_seq]
+    targets = target.split(motif)
+    if targets:
+        return motif.join(fit_target(t, motif) for t in targets)
+    else:
+        return target
+
+
+def align(df, column_seq, column_len, motif):
+    column_seq_aln = column_seq+'_aln'
+    dfg = group(df, column_seq, column_len, 1200)
+    dfg[column_seq_aln] = dfg.apply(lambda x: fit(x, column_seq, motif), axis=1)
+    alns = dict(zip(dfg[column_seq], dfg[column_seq_aln]))
+    return df.apply(lambda x: alns.get(x[column_seq], x[column_seq]), axis=1)
 
 
 def get_abundant_lengths(df, column_seq, column_len, threshold):
@@ -97,7 +164,7 @@ def get_abundant_lengths(df, column_seq, column_len, threshold):
 
     cond = dfg[column_seq] > threshold
     dfg = dfg[cond]
-    return dfg
+    return set(dfg[column_len])
 
 
 def consensus_string(strings):
@@ -121,7 +188,7 @@ def consensus_string(strings):
     return consensus
 
 
-def get_consensus_strings(df, abundant_lengths, column_len, column_seq, directions):
+def get_consensus_strings(df, abundant_lengths, column_seq, column_len, directions):
     consensi = []
     for l in sorted(abundant_lengths):
         for direction in directions:
@@ -180,27 +247,75 @@ def main():
     extended = sum(df['ins'] != df['ins_ext'])
     print(f'{datetime.now()} - STRAT Process - Extended {extended} inserts')
     
+    # Orient on-target inserts
+    df['ins'] = df.apply(lambda x: orient_ins(x, 'ins'), axis=1)
+    oriented = sum(df['direction'] == 'rev')
+    print(f'{datetime.now()} - STRAT Process - Oriented {oriented} inserts')
+
+    # Orient extended on-target inserts
+    df['ins_ext'] = df.apply(lambda x: orient_ins(x, 'ins_ext'), axis=1)
+    oriented = sum(df['direction'] == 'rev')
+    print(f'{datetime.now()} - STRAT Process - Oriented {oriented} extended inserts')
+
     # Calculate lengths of inserts
     df = lengths(df, COLUMNS_SEQ + COLUMNS_SEQ_EXT, COLUMNS_LEN + COLUMNS_LEN_EXT)
+    print(f'{datetime.now()} - STRAT Process - Calculated lengths of inserts')
 
-    # Keep abundant insert lengths
-    dfg = get_abundant_lengths(df, 'ins_ext', 'len_ins_ext', threshold)
-    abundant_lengths = set(dfg['len_ins_ext'])
+    # Align on-target inserts
+    df['ins_aln'] = align(df, 'ins', 'len_ins', motif)
+    aligned = sum(df['ins'] != df['ins_aln'])
+    print(f'{datetime.now()} - STRAT Process - Aligned {aligned} inserts')
 
-    cond = df['len_ins_ext'].isin(abundant_lengths)
-    df = df[cond]
-    print(f'{datetime.now()} - STRAT Process - Kept {len(df)} abundant insert length rows')
+    # Align extedned on-target inserts
+    df['ins_ext_aln'] = align(df, 'ins_ext', 'len_ins_ext', motif)
+    aligned = sum(df['ins_ext'] != df['ins_ext_aln'])
+    print(f'{datetime.now()} - STRAT Process - Aligned {aligned} extended inserts')
 
-    # Generate consensus strings per extended insert size
-    dfc = get_consensus_strings(df, abundant_lengths, 'len_ins_ext', 'ins_ext', DIRECTIONS)
-    output_consensus = f'{output_path}consensus.ontarget.ext.tsv'
+    # Calculate lengths of aligned inserts
+    df = lengths(df, COLUMNS_SEQ_ALN, COLUMNS_LEN_ALN)
+    print(f'{datetime.now()} - STRAT Process - Calculated lengths of inserts')
+
+    name = '.'.join(input_path.split('/')[-1].split('.')[:-1])
+    output_processed = f'{output_path}{name}.processed.tsv'
+    df[[
+        'id', 'direction',
+        'len_ins', 'len_ins_aln', 'len_ins_ext', 'len_ins_ext_aln',
+        'ins', 'ins_aln', 'ins_ext', 'ins_ext_aln',
+        ]].to_csv(output_processed, sep='\t', index=False)
+    print(f'{datetime.now()} - STRAT Process - Written {output_processed} file')
+
+    # Generate consensus strings per insert size
+    abundant_lengths = get_abundant_lengths(df, 'ins', 'len_ins', threshold)
+    dfc = get_consensus_strings(df, abundant_lengths, 'ins', 'len_ins', DIRECTIONS)
+    output_consensus = f'{output_path}{name}.processed.consensus.tsv'
     dfc.to_csv(output_consensus, index=False, sep='\t')
     print(f'{datetime.now()} - STRAT Process - Written {len(dfc)} consensus inserts to {output_consensus}')
 
-    # Plot histogram
-    output_histogram = f'{output_path}inserts.ontarget.ext.png'
-    plot_histogram(df.sort_values('direction'), 'len_ins_ext_adj', 'direction', output_histogram)
-    print(f'{datetime.now()} - STRAT Process - Plotted insert length histogram to {output_histogram}')
+    # Generate consensus strings per aligned insert size
+    abundant_lengths = get_abundant_lengths(df, 'ins_aln', 'len_ins_aln', threshold)
+    dfc = get_consensus_strings(df, abundant_lengths, 'ins_aln', 'len_ins_aln', DIRECTIONS)
+    output_consensus = f'{output_path}{name}.processed.consensus.aln.tsv'
+    dfc.to_csv(output_consensus, index=False, sep='\t')
+    print(f'{datetime.now()} - STRAT Process - Written {len(dfc)} aligned consensus inserts to {output_consensus}')
+
+    # Generate consensus strings per extended insert size
+    abundant_lengths = get_abundant_lengths(df, 'ins_ext', 'len_ins_ext', threshold)
+    dfc = get_consensus_strings(df, abundant_lengths, 'ins_ext', 'len_ins_ext', DIRECTIONS)
+    output_consensus = f'{output_path}{name}.processed.consensus.ext.tsv'
+    dfc.to_csv(output_consensus, index=False, sep='\t')
+    print(f'{datetime.now()} - STRAT Process - Written {len(dfc)} extended consensus inserts to {output_consensus}')
+
+    # Generate consensus strings per extended aligned insert size
+    abundant_lengths = get_abundant_lengths(df, 'ins_ext_aln', 'len_ins_ext_aln', threshold)
+    dfc = get_consensus_strings(df, abundant_lengths, 'ins_ext_aln', 'len_ins_ext_aln', DIRECTIONS)
+    output_consensus = f'{output_path}{name}.processed.consensus.ext.aln.tsv'
+    dfc.to_csv(output_consensus, index=False, sep='\t')
+    print(f'{datetime.now()} - STRAT Process - Written {len(dfc)} extended aligned consensus inserts to {output_consensus}')
+
+    # # Plot histogram
+    # output_histogram = f'{output_path}inserts.ontarget.ext.png'
+    # plot_histogram(df.sort_values('direction'), 'len_ins_ext_adj', 'direction', output_histogram)
+    # print(f'{datetime.now()} - STRAT Process - Plotted insert length histogram to {output_histogram}')
 
     print(f'{datetime.now()} - STRAT Process - End')
 
