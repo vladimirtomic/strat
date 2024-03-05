@@ -2,43 +2,11 @@
 
 Short tandem repeats analysis tool (STRAT).
 
-<style>
-    .color-square {
-        display: inline-block;
-        width: 40px;
-        height: 20px;
-        margin-right: 5px;
-        border: 1px solid black;
-        text-align: center;
-        line-height: 20px;
-    }
-
-    .green {
-        background-color: #3DA853;
-    }
-
-    .blue {
-        background-color: #4285F4;
-    }
-
-    .yellow {
-        background-color: #F8BC07;
-    }
-
-    .red {
-        background-color: #EA4334;
-    }
-
-    .white {
-        background-color: white;
-    }
-</style>
-
-<div class="color-square green">A</div>
-<div class="color-square blue">C</div>
-<div class="color-square yellow">G</div>
-<div class="color-square red">T</div>
-<div class="color-square white">DEL</div>
+- A - green
+- C - blue
+- G - yellow
+- T - red
+- DEL - white
 
 ## 1. Setup
 
