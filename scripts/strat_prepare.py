@@ -61,34 +61,31 @@ class ReadProcessor:
         }
 
     def process_read(self, id, seq, opt, qual):
-        hits = 0
         row = ['offtarget', id, seq, qual]
+        ress = []
         for k in DIRECTIONS:
             prefixes = regex.findall(self.prefix[k], seq)
             suffixes = regex.findall(self.suffix[k], seq)
             if len(prefixes) == 1 and len(suffixes) == 1:
-                if hits == 1:
-                    hits = 2
-                    break
-                
                 start = seq.index(prefixes[0]) + len(prefixes[0])
                 end = seq.index(suffixes[0])
                 if end > start:
                     direction = k
-                    hits = 1
                     prefix_flank, ins, suffix_flank = chop(seq, start, end)
                     prefix_flank_q, ins_q, suffix_flank_q = chop(qual, start, end)
 
-        if hits == 1:
-            return [
-                'ontarget',
-                direction,
-                id,
-                prefix_flank, ins, suffix_flank,
-                prefix_flank_q, ins_q, suffix_flank_q
-            ]
-        else:
-            return row
+                    ress.append([
+                        'ontarget',
+                        direction,
+                        id,
+                        prefix_flank, ins, suffix_flank,
+                        prefix_flank_q, ins_q, suffix_flank_q
+                    ])
+
+        if not ress:
+            ress.append(row)
+
+        return ress
 
 
 def process_fastq(fastq_path, output_path, read_processor):
@@ -118,12 +115,13 @@ def process_fastq(fastq_path, output_path, read_processor):
                     raise
             elif i%4 == 3:
                 qual = line
-                res = read_processor.process_read(id, seq, opt, qual)
-                if res[0] == 'ontarget':
-                    o.write('\t'.join(res[1:]) + '\n')
-                else:
-                    # g.write('\t'.join(res[1:]) + '\n')
-                    pass
+                ress = read_processor.process_read(id, seq, opt, qual)
+                for res in ress:
+                    if res[0] == 'ontarget':
+                        o.write('\t'.join(res[1:]) + '\n')
+                    else:
+                        # g.write('\t'.join(res[1:]) + '\n')
+                        pass
 
 
 def main():

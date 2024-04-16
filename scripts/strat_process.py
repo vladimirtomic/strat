@@ -122,7 +122,7 @@ def lengths(df, columns_seq, columns_len):
     return df
 
 
-def group(df, column_seq, column_len, cutoff=1200):
+def group(df, column_seq, column_len, cutoff=120000):
     dfg = df.groupby([column_seq, column_len])['id'].count().reset_index()
     dfg.columns = [column_seq, column_len, 'count']
     cond = dfg[column_len] <= cutoff
@@ -133,11 +133,17 @@ def group(df, column_seq, column_len, cutoff=1200):
 
 def fit_target(t, motif, nw=NW):
     if t is not None and len(t) > 0:
-        source = int(np.round((len(t) / 3))) * motif
-        aligned_source, aligned_target = nw.get_alignment(source, t, return_score_matrix=False)
-        aligned_source = aligned_source.split(' | ')
-        aligned_target = aligned_target.split(' | ')
-        return ''.join(t for s, t in zip(aligned_source, aligned_target) if s != ' ')
+        # source = int(np.round((len(t) / 3))) * motif
+        # aligned_source, aligned_target = nw.get_alignment(source, t, return_score_matrix=False)
+        # aligned_source = aligned_source.split(' | ')
+        # aligned_target = aligned_target.split(' | ')
+        # return ''.join(t for s, t in zip(aligned_source, aligned_target) if s != ' ')
+
+        fill = len(t) % 3
+        if fill == 1:
+            t = t + 'II'
+        if fill == 2:
+            t = t + 'I'
 
     return t
 
@@ -153,7 +159,7 @@ def fit(row, column_seq, motif):
 
 def align(df, column_seq, column_len, motif):
     column_seq_aln = column_seq+'_aln'
-    dfg = group(df, column_seq, column_len, 1200)
+    dfg = group(df, column_seq, column_len, 120000)
     dfg[column_seq_aln] = dfg.apply(lambda x: fit(x, column_seq, motif), axis=1)
     alns = dict(zip(dfg[column_seq], dfg[column_seq_aln]))
     return df.apply(lambda x: alns.get(x[column_seq], x[column_seq]), axis=1)
