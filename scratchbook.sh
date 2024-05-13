@@ -1,4 +1,135 @@
 # ----------
+# 2024-05-13
+# ----------
+
+docker run \
+--rm \
+-it \
+-v /Users/vladimirtomic/Documents/repos/strat/:/opt/repos/strat/ \
+-v /Users/vladimirtomic/Documents/projects/ONT/data/:/opt/data/ \
+strat:latest
+
+# 2h 3min
+python /opt/repos/strat/scripts/strat_prepare.py \
+--prefix 'AGAAAGAAATGGTCTGTGATCCCCC' \
+--suffix 'CATTCCCGGCTACAAGGACCCTTCG' \
+--motif 'CAG' \
+--tolerance '{e<=5}' \
+--cores 1 \
+--input_path '/opt/data/bc6_1/fastq/dorado/' \
+--output_path '/opt/data/bc6_1/output/dorado/'
+
+cat /opt/data/bc6_1/output/dorado/*.ontarget.tsv 1> /opt/data/workdir/bc6_7.dorado.ontarget.tsv
+
+python /opt/repos/strat/scripts/strat_process.py \
+--motif 'CAG' \
+--threshold '1' \
+--input_path '/opt/data/workdir/bc6_7.dorado.ontarget.tsv' \
+--output_path '/opt/data/workdir/' \
+1> /opt/data/workdir/bc6_7.dorado.std.out \
+2> /opt/data/workdir/bc6_7.dorado.std.err
+
+# 4h 34min
+python /opt/repos/strat/scripts/strat_prepare.py \
+--prefix 'AGAAAGAAATGGTCTGTGATCCCCC' \
+--suffix 'CATTCCCGGCTACAAGGACCCTTCG' \
+--motif 'CAG' \
+--tolerance '{e<=5}' \
+--cores 1 \
+--input_path '/opt/data/bc6_2/fastq/dorado/' \
+--output_path '/opt/data/bc6_2/output/dorado/'
+
+cat /opt/data/bc6_2/output/dorado/*.ontarget.tsv 1> /opt/data/workdir/bc6_8.dorado.ontarget.tsv
+
+python /opt/repos/strat/scripts/strat_process.py \
+--motif 'CAG' \
+--threshold '1' \
+--input_path '/opt/data/workdir/bc6_8.dorado.ontarget.tsv' \
+--output_path '/opt/data/workdir/' \
+1> /opt/data/workdir/bc6_8.dorado.std.out \
+2> /opt/data/workdir/bc6_8.dorado.std.err
+
+# 4h 32min
+python /opt/repos/strat/scripts/strat_prepare.py \
+--prefix 'AGAAAGAAATGGTCTGTGATCCCCC' \
+--suffix 'CATTCCCGGCTACAAGGACCCTTCG' \
+--motif 'CAG' \
+--tolerance '{e<=5}' \
+--cores 1 \
+--input_path '/opt/data/bc6_3/fastq/dorado/' \
+--output_path '/opt/data/bc6_3/output/dorado/'
+
+cat /opt/data/bc6_3/output/dorado/*.ontarget.tsv 1> /opt/data/workdir/bc6_9.dorado.ontarget.tsv
+
+python /opt/repos/strat/scripts/strat_process.py \
+--motif 'CAG' \
+--threshold '1' \
+--input_path '/opt/data/workdir/bc6_9.dorado.ontarget.tsv' \
+--output_path '/opt/data/workdir/' \
+1> /opt/data/workdir/bc6_9.dorado.std.out \
+2> /opt/data/workdir/bc6_9.dorado.std.err
+
+# 1h 54min
+python /opt/repos/strat/scripts/strat_prepare.py \
+--prefix 'AGAAAGAAATGGTCTGTGATCCCCC' \
+--suffix 'CATTCCCGGCTACAAGGACCCTTCG' \
+--motif 'CAG' \
+--tolerance '{e<=5}' \
+--cores 1 \
+--input_path '/opt/data/bc6_4/fastq/dorado/' \
+--output_path '/opt/data/bc6_4/output/dorado/'
+
+cat /opt/data/bc6_4/output/dorado/*.ontarget.tsv 1> /opt/data/workdir/bc6_10.dorado.ontarget.tsv
+
+python /opt/repos/strat/scripts/strat_process.py \
+--motif 'CAG' \
+--threshold '1' \
+--input_path '/opt/data/workdir/bc6_10.dorado.ontarget.tsv' \
+--output_path '/opt/data/workdir/' \
+1> /opt/data/workdir/bc6_10.dorado.std.out \
+2> /opt/data/workdir/bc6_10.dorado.std.err
+
+# 1h 57min
+python /opt/repos/strat/scripts/strat_prepare.py \
+--prefix 'AGAAAGAAATGGTCTGTGATCCCCC' \
+--suffix 'CATTCCCGGCTACAAGGACCCTTCG' \
+--motif 'CAG' \
+--tolerance '{e<=5}' \
+--cores 1 \
+--input_path '/opt/data/bc6_5/fastq/dorado/' \
+--output_path '/opt/data/bc6_5/output/dorado/'
+
+cat /opt/data/bc6_5/output/dorado/*.ontarget.tsv 1> /opt/data/workdir/bc6_11.dorado.ontarget.tsv
+
+python /opt/repos/strat/scripts/strat_process.py \
+--motif 'CAG' \
+--threshold '1' \
+--input_path '/opt/data/workdir/bc6_11.dorado.ontarget.tsv' \
+--output_path '/opt/data/workdir/' \
+1> /opt/data/workdir/bc6_11.dorado.std.out \
+2> /opt/data/workdir/bc6_11.dorado.std.err
+
+# 4h 36min
+python /opt/repos/strat/scripts/strat_prepare.py \
+--prefix 'AGAAAGAAATGGTCTGTGATCCCCC' \
+--suffix 'CATTCCCGGCTACAAGGACCCTTCG' \
+--motif 'CAG' \
+--tolerance '{e<=5}' \
+--cores 1 \
+--input_path '/opt/data/bc6_6/fastq/dorado/' \
+--output_path '/opt/data/bc6_6/output/dorado/'
+
+cat /opt/data/bc6_6/output/dorado/*.ontarget.tsv 1> /opt/data/workdir/bc6_12.dorado.ontarget.tsv
+
+python /opt/repos/strat/scripts/strat_process.py \
+--motif 'CAG' \
+--threshold '1' \
+--input_path '/opt/data/workdir/bc6_12.dorado.ontarget.tsv' \
+--output_path '/opt/data/workdir/' \
+1> /opt/data/workdir/bc6_12.dorado.std.out \
+2> /opt/data/workdir/bc6_12.dorado.std.err
+
+# ----------
 # 2024-04-15
 # ----------
 
