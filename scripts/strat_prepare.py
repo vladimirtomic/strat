@@ -26,7 +26,7 @@ def parse_arguments():
     parser.add_argument('--suffix', type=str, required=True, help='Suffix flank sequence of the repeat region (ex. "CATTCCCGGCTACAAGGACCCTTCG")')
     parser.add_argument('--motif', type=str, required=True, help='Repeat region motif (ex. "CAG")')
     parser.add_argument('--tolerance', type=str, required=True, help='Regex error tolerance configuration (ex. "{e<=5}")')
-    parser.add_argument('--cores', type=str, required=True, help='Number of CPU cores to utilize (ex. 2)')
+    parser.add_argument('--cores', type=int, required=True, help='Number of CPU cores to utilize (ex. 2)')
     parser.add_argument('--input_path', type=str, required=True, help='Path to directory containing input FASTQ(.GZ) files (ex. "/data/fastqs/")')
     parser.add_argument('--output_path', type=str, required=True, help='Path to directory to store output files (ex. "/data/outputs/")')
     
@@ -155,7 +155,7 @@ def main():
 
     inputs = [(fastq_path, output_path, ReadProcessor(prefix, suffix, tolerance)) for fastq_path in fastq_paths]
 
-    with Pool(2) as p:
+    with Pool(cores) as p:
         p.starmap(process_fastq, inputs)
 
     print(f'{datetime.now()} - STRAT Prepare - End')
