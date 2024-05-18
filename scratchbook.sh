@@ -1,4 +1,146 @@
 # ----------
+# 2024-05-18
+# ----------
+
+docker run \
+--rm \
+-it \
+-v /Users/vladimirtomic/Documents/repos/strat/:/opt/repos/strat/ \
+-v /Users/vladimirtomic/Documents/projects/ONT/data/:/opt/data/ \
+strat:latest
+
+# 21min
+python /opt/repos/strat/scripts/strat_prepare.py \
+--prefix 'TAAGATAATATATTTTTAAAAAATG' \
+--suffix 'TAAAGCCAGGTTTTCTAACATGAAG' \
+--motif 'CAG' \
+--tolerance '{e<=5}' \
+--cores 2 \
+--input_path '/opt/data/sca8_12/fastq/guppy/' \
+--output_path '/opt/data/sca8_12/output/guppy/'
+
+cat /opt/data/sca8_12/output/guppy/*.ontarget.tsv 1> /opt/data/workdir/sca8_12.guppy.ontarget.tsv
+
+python /opt/repos/strat/scripts/strat_process.py \
+--motif 'CAG' \
+--threshold '1' \
+--input_path '/opt/data/workdir/sca8_12.guppy.ontarget.tsv' \
+--output_path '/opt/data/workdir/' \
+1> /opt/data/workdir/sca8_12.guppy.std.out \
+2> /opt/data/workdir/sca8_12.guppy.std.err
+
+# 18min
+python /opt/repos/strat/scripts/strat_prepare.py \
+--prefix 'TAAGATAATATATTTTTAAAAAATG' \
+--suffix 'TAAAGCCAGGTTTTCTAACATGAAG' \
+--motif 'CAG' \
+--tolerance '{e<=5}' \
+--cores 2 \
+--input_path '/opt/data/sca8_15/fastq/guppy/' \
+--output_path '/opt/data/sca8_15/output/guppy/'
+
+cat /opt/data/sca8_15/output/guppy/*.ontarget.tsv 1> /opt/data/workdir/sca8_15.guppy.ontarget.tsv
+
+python /opt/repos/strat/scripts/strat_process.py \
+--motif 'CAG' \
+--threshold '1' \
+--input_path '/opt/data/workdir/sca8_15.guppy.ontarget.tsv' \
+--output_path '/opt/data/workdir/' \
+1> /opt/data/workdir/sca8_15.guppy.std.out \
+2> /opt/data/workdir/sca8_15.guppy.std.err
+
+# 25min
+python /opt/repos/strat/scripts/strat_prepare.py \
+--prefix 'TAAGATAATATATTTTTAAAAAATG' \
+--suffix 'TAAAGCCAGGTTTTCTAACATGAAG' \
+--motif 'CAG' \
+--tolerance '{e<=5}' \
+--cores 2 \
+--input_path '/opt/data/sca8_16/fastq/guppy/' \
+--output_path '/opt/data/sca8_16/output/guppy/'
+
+cat /opt/data/sca8_16/output/guppy/*.ontarget.tsv 1> /opt/data/workdir/sca8_16.guppy.ontarget.tsv
+
+python /opt/repos/strat/scripts/strat_process.py \
+--motif 'CAG' \
+--threshold '1' \
+--input_path '/opt/data/workdir/sca8_16.guppy.ontarget.tsv' \
+--output_path '/opt/data/workdir/' \
+1> /opt/data/workdir/sca8_16.guppy.std.out \
+2> /opt/data/workdir/sca8_16.guppy.std.err
+
+# 19min
+python /opt/repos/strat/scripts/strat_prepare.py \
+--prefix 'TAAGATAATATATTTTTAAAAAATG' \
+--suffix 'TAAAGCCAGGTTTTCTAACATGAAG' \
+--motif 'CAG' \
+--tolerance '{e<=5}' \
+--cores 2 \
+--input_path '/opt/data/sca8_19/fastq/guppy/' \
+--output_path '/opt/data/sca8_19/output/guppy/'
+
+cat /opt/data/sca8_19/output/guppy/*.ontarget.tsv 1> /opt/data/workdir/sca8_19.guppy.ontarget.tsv
+
+python /opt/repos/strat/scripts/strat_process.py \
+--motif 'CAG' \
+--threshold '1' \
+--input_path '/opt/data/workdir/sca8_19.guppy.ontarget.tsv' \
+--output_path '/opt/data/workdir/' \
+1> /opt/data/workdir/sca8_19.guppy.std.out \
+2> /opt/data/workdir/sca8_19.guppy.std.err
+
+# 13min
+python /opt/repos/strat/scripts/strat_prepare.py \
+--prefix 'TAAGATAATATATTTTTAAAAAATG' \
+--suffix 'TAAAGCCAGGTTTTCTAACATGAAG' \
+--motif 'CAG' \
+--tolerance '{e<=5}' \
+--cores 2 \
+--input_path '/opt/data/sca8_20/fastq/guppy/' \
+--output_path '/opt/data/sca8_20/output/guppy/'
+
+cat /opt/data/sca8_20/output/guppy/*.ontarget.tsv 1> /opt/data/workdir/sca8_20.guppy.ontarget.tsv
+
+python /opt/repos/strat/scripts/strat_process.py \
+--motif 'CAG' \
+--threshold '1' \
+--input_path '/opt/data/workdir/sca8_20.guppy.ontarget.tsv' \
+--output_path '/opt/data/workdir/' \
+1> /opt/data/workdir/sca8_20.guppy.std.out \
+2> /opt/data/workdir/sca8_20.guppy.std.err
+
+# ----------
+# 2024-05-16
+# ----------
+
+docker run \
+--rm \
+-it \
+-v /Users/vladimirtomic/Documents/repos/strat/:/opt/repos/strat/ \
+-v /Users/vladimirtomic/Documents/projects/ONT/data/:/opt/data/ \
+strat:latest
+
+# 50min
+python /opt/repos/strat/scripts/strat_prepare.py \
+--prefix 'TAAGATAATATATTTTTAAAAAATG' \
+--suffix 'TAAAGCCAGGTTTTCTAACATGAAG' \
+--motif 'CAG' \
+--tolerance '{e<=5}' \
+--cores 5 \
+--input_path '/opt/data/sca8_11/fastq/guppy/' \
+--output_path '/opt/data/sca8_11/output/guppy/'
+
+cat /opt/data/sca8_11/output/guppy/*.ontarget.tsv 1> /opt/data/workdir/sca8_11.guppy.ontarget.tsv
+
+python /opt/repos/strat/scripts/strat_process.py \
+--motif 'CAG' \
+--threshold '1' \
+--input_path '/opt/data/workdir/sca8_11.guppy.ontarget.tsv' \
+--output_path '/opt/data/workdir/' \
+1> /opt/data/workdir/sca8_11.guppy.std.out \
+2> /opt/data/workdir/sca8_11.guppy.std.err
+
+# ----------
 # 2024-05-13
 # ----------
 
