@@ -9,6 +9,10 @@ docker run \
 -v /Users/vladimirtomic/Documents/projects/ONT/data/:/opt/data/ \
 strat:latest
 
+export CALLER=guppy
+export PREFIX=AGAAAGAAATGGTCTGTGATCCCCC
+export SUFFIX=CATTCCCGGCTACAAGGACCCTTCG
+
 export DATASET=bc7_1_18
 export DATASET=bc7_1_19
 export DATASET=bc7_1_20
@@ -23,12 +27,22 @@ export DATASET=bc7_2_21
 export DATASET=bc7_2_22
 export DATASET=bc7_2_23
 export DATASET=bc7_2_24
+
 export CALLER=guppy
+export PREFIX=TAAGATAATATATTTTTAAAAAATG
+export SUFFIX=TAAAGCCAGGTTTTCTAACATGAAG
+
+export DATASET=sca8_2_11
+export DATASET=sca8_2_12
+export DATASET=sca8_2_15
+export DATASET=sca8_2_16
+export DATASET=sca8_2_19
+export DATASET=sca8_2_20
 
 # Xmin
 python /opt/repos/strat/scripts/strat_prepare.py \
---prefix 'AGAAAGAAATGGTCTGTGATCCCCC' \
---suffix 'CATTCCCGGCTACAAGGACCCTTCG' \
+--prefix "$PREFIX" \
+--suffix "$SUFFIX" \
 --motif 'CAG' \
 --tolerance '{e<=5}' \
 --cores 2 \
