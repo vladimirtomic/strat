@@ -1,4 +1,20 @@
 # ----------
+# 2024-06-15
+# ----------
+
+docker run \
+--rm \
+-it \
+-p 8888:8888 \
+-v /Users/vladimirtomic/Documents/repos/strat/:/opt/repos/strat/ \
+-v /Users/vladimirtomic/Documents/projects/ONT/data/:/opt/data/ \
+-v /Users/vladimirtomic/Documents/projects/ONT/data_out/:/opt/data_out/ \
+strat:latest
+
+# Run notebooks inside the docker container
+jupyter notebook --ip 0.0.0.0 --port 8888 --no-browser --allow-root
+
+# ----------
 # 2024-05-18
 # ----------
 

@@ -43,6 +43,20 @@ COLUMNS_PROCESSED = [
     'ins_ext_aln',
 ]
 
+COLUMNS_SEQ = [
+    'ins',
+    'ins_aln',
+    'ins_ext',
+    'ins_ext_aln',
+]
+
+COLUMNS_LEN = [
+    'len_ins',
+    'len_ins_aln',
+    'len_ins_ext',
+    'len_ins_ext_aln',
+]
+
 MATCH_WEIGHT = 10
 MISMATCH_WEIGHT = -8
 GAP_WEIGHT = -9
@@ -58,7 +72,8 @@ COLORS = {
     'C': '#4285F4',  # blue
     'G': '#F8BC07',  # yellow
     'T': '#EA4334',  # red
-    ' ': 'white'
+    'I': 'white',
+    ' ': 'white',
 }
 
 
@@ -71,7 +86,7 @@ def load_tsv(input_path, columns=None):
         header = None
     else:
         header = 0
-    df = pd.read_csv(input_path, sep='\t', header=header, dtype=str, quoting=QUOTE_NONE)
+    df = pd.read_csv(input_path, sep='\t', header=header, quoting=QUOTE_NONE)
     if columns:
         df.columns = columns
 
@@ -146,7 +161,7 @@ def plot(df, col_seq, width, output_path):
     )
     for i in range(width):
         x = i + 1
-        N = 'CTG'[i%3]
+        N = 'CAG'[i%3]
         colors_ordered = sorted(color_set - set(N)) + [N]
 
         if df_prep_fwd is not None and i in df_prep_fwd.index:
@@ -199,11 +214,12 @@ def plot(df, col_seq, width, output_path):
 
 def plot_range(input_path, col_seq, start, stop, output_path):
     df = load_tsv(input_path)
-    df[col_seq] = df.apply(lambda x: rev_comp(x[col_seq]), axis=1)
+    # df[col_seq] = df.apply(lambda x: rev_comp(x[col_seq]), axis=1)
     col_len = 'len_' + col_seq
     df[col_len] = df[col_len].astype(int)
     cond = df[col_len] >= start
     cond &= df[col_len] < stop
     width = stop - 1
+    width = min(width, df[cond][col_len].max())
     if len(df[cond]):
         plot(df[cond], col_seq, width, output_path)
