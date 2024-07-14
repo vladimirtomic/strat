@@ -1,4 +1,16 @@
 # ----------
+# 2024-07-13
+# ----------
+
+docker run \
+--rm \
+-it \
+-v /Users/vladimirtomic/Documents/repos/strat/:/opt/repos/strat/ \
+-v /Users/vladimirtomic/Documents/projects/ONT/data/:/opt/data/ \
+-v /Users/vladimirtomic/Documents/projects/ONT/data_out/:/opt/data_out/ \
+strat:latest
+
+# ----------
 # 2024-06-15
 # ----------
 

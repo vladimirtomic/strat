@@ -67,7 +67,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='STRAT Process - Short Tandem Repeat Analysis Tool - process on-target inserts collected by STRAT Prepare')
     
     # Define string parameters
-    parser.add_argument('--motif', type=str, required=True, help='Repeat region motif (ex. "CAG")')
+    parser.add_argument('--motif_prim', type=str, required=True, help="Primary 5' repeat region motif (ex. 'CAG')")
+    parser.add_argument('--motif_scnd', type=str, required=True, help="Secondary 3' Repeat region motif (ex. 'TAG')")
     parser.add_argument('--threshold', type=int, required=True, help='Minimum number of inserts of each size (ex. "100")')
     parser.add_argument('--input_path', type=str, required=True, help='Path to TSV file containing output of STRAT Prepare (ex. "/data/fastqs/")')
     parser.add_argument('--output_path', type=str, required=True, help='Path to directory to store output files (ex. "/data/outputs/")')
@@ -90,8 +91,8 @@ def extend_ins(row):
     prefix = row['prefix_flank']
     ins = row['ins']
     suffix = row['suffix_flank']
-    motif = MOTIFS[row['direction']]
-    target = 2 * motif
+    motif_prefix, motif_suffix = MOTIFS[row['direction']]
+    target = 2 * motif_prefix
     window = len(target)
     for s in range(window - 1):
         # i in (window-1)..1
@@ -100,6 +101,8 @@ def extend_ins(row):
             ins = prefix[-i:] + ins
             break
     
+    target = 2 * motif_suffix
+    window = len(target)
     for s in range(window - 1):
         # i in 1..(window-1)
         i = s + 1
@@ -131,19 +134,17 @@ def group(df, column_seq, column_len, cutoff=120000):
     return dfg
 
 
-def fit_target(t, motif, nw=NW):
-    if t is not None and len(t) > 0:
+def fit_target(t, len_motif, nw=NW):
+    if t is not None and len(t) > 0 and len(t) % len_motif != 0:
         # source = int(np.round((len(t) / 3))) * motif
         # aligned_source, aligned_target = nw.get_alignment(source, t, return_score_matrix=False)
         # aligned_source = aligned_source.split(' | ')
         # aligned_target = aligned_target.split(' | ')
         # return ''.join(t for s, t in zip(aligned_source, aligned_target) if s != ' ')
 
-        fill = len(t) % 3
-        if fill == 1:
-            t = t + 'II'
-        if fill == 2:
-            t = t + 'I'
+        len_fill = len_motif - len(t) % len_motif
+        fill = ''.join('I' for _ in range(len_fill))
+        t = t + fill
 
     return t
 
@@ -152,7 +153,7 @@ def fit(row, column_seq, motif):
     target = row[column_seq]
     targets = target.split(motif)
     if targets:
-        return motif.join(fit_target(t, motif) for t in targets)
+        return motif.join(fit_target(t, len(motif)) for t in targets)
     else:
         return target
 
@@ -224,7 +225,8 @@ def main():
     args = parse_arguments().parse_args()
 
     # Access the values of the parameters
-    motif = args.motif
+    motif_prim = args.motif_prim
+    motif_scnd = args.motif_scnd
     threshold = args.threshold
     input_path = args.input_path
     output_path = args.output_path
@@ -232,12 +234,19 @@ def main():
     # Generate reverse complement motif
     global MOTIFS
     MOTIFS = {
-        'fwd': motif,
-        'rev': rev_comp(motif, COMPLEMENT)
+        'fwd': [
+            motif_prim,
+            motif_scnd
+            ],
+        'rev': [
+            rev_comp(motif_scnd, COMPLEMENT),
+            rev_comp(motif_prim, COMPLEMENT)
+            ]
     }
 
     # Log provided parameters
-    print(f'motif: {motif}')
+    print(f'motif_prim: {motif_prim}')
+    print(f'motif_scnd: {motif_scnd}')
     print(f'threshold: {threshold}')
     print(f'input_path: {input_path}')
     print(f'output_path: {output_path}')
@@ -268,12 +277,12 @@ def main():
     print(f'{datetime.now()} - STRAT Process - Calculated lengths of inserts')
 
     # Align on-target inserts
-    df['ins_aln'] = align(df, 'ins', 'len_ins', motif)
+    df['ins_aln'] = align(df, 'ins', 'len_ins', motif_prim)
     aligned = sum(df['ins'] != df['ins_aln'])
     print(f'{datetime.now()} - STRAT Process - Aligned {aligned} inserts')
 
     # Align extedned on-target inserts
-    df['ins_ext_aln'] = align(df, 'ins_ext', 'len_ins_ext', motif)
+    df['ins_ext_aln'] = align(df, 'ins_ext', 'len_ins_ext', motif_prim)
     aligned = sum(df['ins_ext'] != df['ins_ext_aln'])
     print(f'{datetime.now()} - STRAT Process - Aligned {aligned} extended inserts')
 

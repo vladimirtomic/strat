@@ -72,8 +72,8 @@ COLORS = {
     'C': '#4285F4',  # blue
     'G': '#F8BC07',  # yellow
     'T': '#EA4334',  # red
-    'I': 'white',
-    ' ': 'white',
+    'I': '#FFFFFF',  # white
+    ' ': '#FFFFFF',  # white
 }
 
 
