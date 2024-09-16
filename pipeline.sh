@@ -19,3 +19,12 @@ python /opt/repos/strat/scripts/strat_process.py \
 --output_path "/opt/data_out/workdir/" \
 1> /opt/data_out/workdir/$DATASET.$CALLER.strat_process.std.out \
 2> /opt/data_out/workdir/$DATASET.$CALLER.strat_process.std.err
+
+# python /opt/repos/strat/scripts/strat_process_kmers.py \
+# --motif_prim "$MOTIF_PRIM" \
+# --motif_scnd "$MOTIF_SCND" \
+# --threshold '1' \
+# --input_path "/opt/data_out/kmers/$DATASET.$CALLER.kmers.tsv" \
+# --output_path "/opt/data_out/kmers_processed/" \
+# 1> /opt/data_out/kmers_processed/$DATASET.$CALLER.strat_process_kmers.std.out \
+# 2> /opt/data_out/kmers_processed/$DATASET.$CALLER.strat_process_kmers.std.err
